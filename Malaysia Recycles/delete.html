@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account</title>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- ... other profile elements ... -->
+
+        <!-- Delete account button -->
+        <form id="deleteAccountForm" action="delete_account.php" method="POST">
+            <button type="button" id="deleteAccountButton">Delete Account</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('deleteAccountButton').addEventListener('click', function() {
+            var confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+            if (confirmDelete) {
+                // If the user confirms deletion, submit the form
+                document.getElementById('deleteAccountForm').submit();
+            }
+        });
+    </script>
+</body>
+</html>

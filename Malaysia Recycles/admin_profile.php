@@ -1,0 +1,197 @@
+<?php
+
+include 'Config.php';
+session_start();
+$name = $_SESSION['name'];
+
+// Retrieve the image from the database based on the user's session information
+$imageData = '';
+$sqll = "SELECT image FROM admin WHERE name = '$name'";
+$resultt = $conn->query($sqll);
+if ($resultt->num_rows > 0) {
+    $row = $resultt->fetch_assoc();
+    $imageData = $row["image"];
+}
+
+if(isset($_POST['update_profile'])){
+
+   $update_email = mysqli_real_escape_string($conn, $_POST['update_email']);
+   
+
+   mysqli_query($conn, "UPDATE `admin` SET  email = '$update_email' WHERE name = '$name'") or die('query failed');
+
+
+   $old_pass = $_POST['old_pass'];
+   $update_pass = mysqli_real_escape_string($conn, ($_POST['update_pass']));
+   $new_pass = mysqli_real_escape_string($conn, ($_POST['new_pass']));
+   $confirm_pass = mysqli_real_escape_string($conn, ($_POST['confirm_pass']));
+
+   if(!empty($update_pass) || !empty($new_pass) || !empty($confirm_pass)){
+      if($update_pass != $old_pass){
+         $message[] = 'old password not matched!';
+      }elseif (!preg_match ("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/", $new_pass)){
+         $message[] = 'Password length min 8 & must contain one capital letter, one integer!';
+      }elseif($new_pass != $confirm_pass){
+         $message[] = 'confirm password not matched!';
+      }else{
+         mysqli_query($conn, "UPDATE `admin` SET pass = '$confirm_pass' WHERE name = '$name'") or die('query failed');
+         $message[] = 'password updated successfully!';
+      }
+   }
+
+   $update_image = $_FILES['update_image']['name'];
+   $update_image_size = $_FILES['update_image']['size'];
+   $update_image_tmp_name = $_FILES['update_image']['tmp_name'];
+   $update_image_folder = 'img/upload/'.$update_image;
+
+   if(!empty($update_image)){
+      if($update_image_size > 2000000){
+         $message[] = 'image is too large';
+      }else{
+         $image_update_query = mysqli_query($conn, "UPDATE `admin` SET image = '$update_image' WHERE name = '$name'") or die('query failed');
+         if($image_update_query){
+            move_uploaded_file($update_image_tmp_name, $update_image_folder);
+         }
+         $message[] = 'image updated succssfully!';
+      }
+   }
+
+}
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Event Registration</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="admin_dashboard.css">
+
+    <link rel="stylesheet" href="styles.css">
+
+
+    <style>
+    .profile-image {
+    width: 200px; 
+    height: 200px; 
+    border-radius: 50%; 
+    overflow: hidden; 
+    margin: 0 auto; 
+    border: 10px solid #008000;
+}
+
+   .profile-image img {
+    width: 100%; /* Ensures the image fills the circular container */
+    height: auto; /* Maintains aspect ratio */
+    display: block; /* Prevents any extra spacing */
+
+    
+
+}
+
+.message {
+    background-color: #008000; /* Dark Green */
+    color: #fff; /* White text */
+    padding: 10px;
+    margin: 10px auto; /* Center the message horizontally */
+    border-radius: 5px;
+    text-align: center; /* Center the text */
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="sidenav">
+      <div class="profile">
+        <!-- Display the retrieved image -->
+            <?php if (!empty($imageData)) : ?>
+                <img src="img/upload/<?php echo $imageData; ?>" alt="Profile Picture">
+            <?php else : ?>
+                <img src="img/profile-pic.jpg" alt="Profile Picture">
+            <?php endif; ?>
+        <h3><?php echo $_SESSION['name'] ?></h3>
+      </div>
+      <a href="admin.php">Home</a>
+      <a href="admin-events.php">Events</a>
+      <a href="admin-eventconfirmation.php">Event Confirmation</a>
+      <a href="admin-eventregistration.php">Event Registration</a>
+      <a href="admin-contactus.php">Contact Us</a>
+      <a href="admin-manageuser.php">Manage User Profile</a>
+      <a href="admin_profile.php">Edit Profile</a>
+      <a href="index.php">LogOut</a>
+      
+    </div>
+
+    <div class="content">
+    <div class="profile-container">
+        <header>
+            <h1>Profile Details</h1>
+        </header>
+
+        <?php
+      $select = mysqli_query($conn, "SELECT * FROM `admin` WHERE name = '$name'") or die('query failed');
+      if(mysqli_num_rows($select) > 0){
+         $fetch = mysqli_fetch_assoc($select);
+      }
+     ?>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+        
+        <?php
+    if ($fetch['image'] == '') {
+        echo '<div class="profile-image"><img src="img/upload/default-avatar.png"></div>';
+    } else {
+        echo '<div class="profile-image"><img src="img/upload/'.$fetch['image'].'"></div>';
+    }
+    if (isset($message)) {
+        foreach ($message as $msg) {
+            echo '<div class="message">'.$msg.'</div>';
+        }
+    }
+?>
+
+            <div class="proform-group">
+                <label for="name">Full Name</label>
+                <input type="text" name="update_fullName" value="<?php echo $fetch['name']; ?>" >
+            </div>
+
+            <div class="proform-group">
+                <label for="email">Email</label>
+                <input type="text" name="update_email" value="<?php echo $fetch['email']; ?>" >
+            </div>
+
+            <input type="hidden" name="old_pass" value="<?php echo $fetch['pass']; ?>"  >
+            <div class="proform-group">
+                <label for="oldpassword">Old password</label>
+                <input type="password" name="update_pass" placeholder="enter previous password"  >
+            </div>
+            <div class="proform-group">
+                <label for="newpassword">New password</label>
+                <input type="password" name="new_pass" placeholder="enter new password"   >
+            </div>
+            <div class="proform-group">
+                <label for="confirmpassword">Confirm password</label>
+                <input type="password" name="confirm_pass" placeholder="confirm new password" >
+            </div>
+
+
+            <!-- File upload for profile picture -->
+            <div class="proform-group">
+                <label for="profilePicture">Upload Profile Picture</label>
+                <input type="file" name="update_image" accept="image/jpg, image/jpeg, image/png" >
+                
+            </div>
+
+            <!-- Submit button -->
+            <div class="proform-group">
+                <button type="submit" name="update_profile">Update Profile</button>
+            </div>
+
+        </form>
+    </div>
+   </div>
+
+</body>
+</html>
+

@@ -1,0 +1,85 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-header {
+    background: #333;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logo {
+    font-size: 24px;
+}
+
+.logout-button {
+    padding: 10px;
+    background: #f00;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.sidebar {
+    background: #555;
+    color: #ddd;
+    width: 200px;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar-nav {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 10px;
+    color: #ddd;
+    text-decoration: none;
+    border-bottom: 1px solid #777;
+}
+
+.sidebar-link:hover {
+    background: #666;
+}
+
+.dashboard-main {
+    margin-left: 200px;
+    padding: 20px;
+}
+
+.stat-card {
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Add responsiveness */
+@media screen and (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .dashboard-main {
+        margin-left: 0;
+    }
+
+    .logout-button {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+    }
+}
